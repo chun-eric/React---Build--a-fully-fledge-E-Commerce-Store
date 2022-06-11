@@ -7,28 +7,56 @@ class App extends Component {
     super();
 
     this.state = {
-      name: { firstName: "Eric", lastName: "Chun" },
-      company: "PhraseCamp",
+      monsters: [],
+      searchField: "",
     };
   }
 
+  componentDidMount() {
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((response) => response.json())
+      .then((users) =>
+        this.setState(
+          () => {
+            return { monsters: users };
+          },
+          () => {
+            console.log(this.state);
+          }
+        )
+      );
+  }
+
+  onsearchChange = (event) => {
+    console.log(event.target.value);
+    const searchField = event.target.value.toLocaleLowerCase();
+    this.setState(() => {
+      return { searchField };
+    });
+  };
+
   render() {
+    const { monsters, searchField } = this.state;
+    const { onsearchChange } = this;
+    const filteredMonsters = monsters.filter((monster) => {
+      return monster.name.toLocaleLowerCase().includes(searchField); //.includes(searchField) is the value of the search item you inputted in the search box
+    });
+
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Hi {this.state.name.firstName} {this.state.name.lastName}, I work at{" "}
-            {this.state.company}
-          </p>
-          <button
-            onClick={() => {
-              this.setState({ name: { firstName: "Jack", lastName: "Smith" } });
-            }}
-          >
-            Change Name
-          </button>
-        </header>
+        <input
+          className="search-box"
+          type="search"
+          placeholder="search monsters"
+          onChange={onsearchChange}
+        />
+        {filteredMonsters.map((monster) => {
+          return (
+            <div key={monster.id}>
+              <h1>{monster.name}</h1>
+            </div>
+          );
+        })}
       </div>
     );
   }
